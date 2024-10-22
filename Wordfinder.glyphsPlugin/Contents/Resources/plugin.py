@@ -31,8 +31,13 @@ class Wordfinder(GeneralPlugin):
     @objc.python_method
     def start(self):
         # create a menu item with its name, and a reference to the method it shoud invoke:
-        newMenuItem = NSMenuItem(self.name, self.findWords)
-
+        if Glyphs.buildNumber >= 3320:
+            from GlyphsApp.UI import MenuItem
+            newMenuItem = MenuItem(self.name, action=self.findWords, target=self)
+        elif Glyphs.versionNumber >= 3.3:
+            newMenuItem = NSMenuItem(self.name, callback=self.findWords, target=self)
+        else:
+            newMenuItem = NSMenuItem(self.name, self.findWords)
         # append the menu item to one of the menus:
         Glyphs.menu[GLYPH_MENU].append(newMenuItem)
 
