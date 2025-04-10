@@ -16,8 +16,9 @@ from __future__ import print_function
 import objc
 import sys
 import re
-from GlyphsApp import Glyphs, GSLayer, GLYPH_MENU, NSMenuItem
+from GlyphsApp import Glyphs, GSLayer, GLYPH_MENU
 from GlyphsApp.plugins import GeneralPlugin
+from Cocoa import NSMenuItem
 
 from wordfinder import wordfinder
 from texthelper import unichar
@@ -26,18 +27,16 @@ from texthelper import unichar
 class Wordfinder(GeneralPlugin):
     @objc.python_method
     def settings(self):
-        self.name = Glyphs.localize({'en': u'Wordfinder'})
+        self.name = Glyphs.localize({'en': 'Wordfinder'})
 
     @objc.python_method
     def start(self):
         # create a menu item with its name, and a reference to the method it shoud invoke:
-        if Glyphs.buildNumber >= 3320:
-            from GlyphsApp.UI import MenuItem
-            newMenuItem = MenuItem(self.name, action=self.findWords, target=self)
-        elif Glyphs.versionNumber >= 3.3:
-            newMenuItem = NSMenuItem(self.name, callback=self.findWords, target=self)
-        else:
-            newMenuItem = NSMenuItem(self.name, self.findWords)
+        newMenuItem = NSMenuItem()
+        newMenuItem.setTitle_(self.name)
+        newMenuItem.setTarget_(self)
+        newMenuItem.setAction_(self.findWords_)
+
         # append the menu item to one of the menus:
         Glyphs.menu[GLYPH_MENU].append(newMenuItem)
 
@@ -82,15 +81,14 @@ class Wordfinder(GeneralPlugin):
 
         return list(set(unicodes))
 
-    @objc.python_method
-    def findWords(self, menuItem):
-        font = Glyphs.fonts[0]
+    def findWords_(self, sender):
+        font = Glyphs.font
         tab = font.currentTab
         glyphs = []
         words = []
         selected = []
 
-        for glyph in Glyphs.font.glyphs:
+        for glyph in font.glyphs:
             if glyph.unicode:
                 glyphs.append(unichar(int(glyph.unicode, 16)))
 
