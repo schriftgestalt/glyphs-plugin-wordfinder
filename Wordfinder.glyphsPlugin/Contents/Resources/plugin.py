@@ -26,18 +26,18 @@ from texthelper import unichar
 class Wordfinder(GeneralPlugin):
     @objc.python_method
     def settings(self):
-        self.name = Glyphs.localize({'en': u'Wordfinder'})
+        self.name = Glyphs.localize({'en': 'Wordfinder'})
 
     @objc.python_method
     def start(self):
         # create a menu item with its name, and a reference to the method it shoud invoke:
         if Glyphs.buildNumber >= 3320:
             from GlyphsApp.UI import MenuItem
-            newMenuItem = MenuItem(self.name, action=self.findWords, target=self)
-        elif Glyphs.versionNumber >= 3.3:
-            newMenuItem = NSMenuItem(self.name, callback=self.findWords, target=self)
+            newMenuItem = MenuItem(self.name, action=self.findWords_, target=self)
         else:
-            newMenuItem = NSMenuItem(self.name, self.findWords)
+            newMenuItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(self.name, self.findWords_, "")
+            newMenuItem.setTarget_(self)
+
         # append the menu item to one of the menus:
         Glyphs.menu[GLYPH_MENU].append(newMenuItem)
 
@@ -82,8 +82,7 @@ class Wordfinder(GeneralPlugin):
 
         return list(set(unicodes))
 
-    @objc.python_method
-    def findWords(self, menuItem):
+    def findWords_(self, menuItem):
         font = Glyphs.fonts[0]
         tab = font.currentTab
         glyphs = []
